@@ -27,7 +27,6 @@ import copy
 class State:
 
     def __init__(self, state=None):
-
         if isinstance(state, State):
             self.__cost = state.__cost + 1
         else:
@@ -42,6 +41,30 @@ class State:
 
     def __call__(self, *args, **kwargs):
         return self.__state.__call__(*args, **kwargs)
+
+    def __lt__(self, other):
+        if isinstance(other, State):
+            return self.__cost < other.__cost
+
+    def __le__(self, other):
+        if isinstance(other, State):
+            return self.__cost <= other.__cost
+          # return comparison
+    def __eq__(self, other):
+        if isinstance(other, State):
+            return self.__cost == other.__cost
+
+    def __ne__(self, other):
+        if isinstance(other, State):
+            return self.__cost != other.__cost
+
+    def __gt__(self, other):
+        if isinstance(other, State):
+            return self.__cost > other.__cost
+
+    def __ge__(self, other):
+        if isinstance(other, State):
+            return self.__cost >= other.__cost
 
     def get(self):
         return self.__state
