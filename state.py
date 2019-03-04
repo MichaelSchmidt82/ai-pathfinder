@@ -26,57 +26,83 @@ import copy
 
 class State:
 
-    def __init__(self, state=None):
-        if isinstance(state, State):
-            self.__cost = state.__cost + 1
-        else:
-            self.__cost = 0
-
+    def __init__(self, maze=None, state=None):
+        self.__cost = 0
         self.__parent = None
-        if isinstance(state, State):
-            self.__parent = state
-            self.__state = copy.copy(state.__state)
-        else:
-            self.__state = copy.copy(state)
+        self.__maze = maze
 
-    def __call__(self, *args, **kwargs):
-        return self.__state.__call__(*args, **kwargs)
+        self.__enterance = {'X': -1, 'Y': -1}
+        self.__exit = {'X': -1, 'Y': -1}
+        self.__pos = dict({})
+
+        if isinstance(state, State):
+            self.__cost = state.__cost
+            self.__parent = state
+            self.__maze = copy.copy(state.__maze)
+
+            self.__enterance = state.__enterance
+            self.__exit = state.__exit
+        elif maze:
+            for _r, row in enumerate(maze):
+                for _c, value in enumerate(row):
+                    if value == 'S':
+                        self.__enterance['X'], self.__enterance['Y'] = _c, _r
+                    elif value == 'E':
+                        self.__exit['X'], self.__exit['Y'] = _c, _r
+
+        self.__pos['X'], self.__pos['Y'] = self.__enterance['X'], self.__enterance['Y']
+
+    def __str__(self):
+        res = ''
+        for _r, row in enumerate(self.__maze):
+            for _c, value in enumerate(row):
+                res = '{} {}'.format(res, value)
+            res = '{} {}'.format(res, '\n')
+
+        res = '{} {}'.format(res, '\n')
+        return res
+
 
     def __lt__(self, other):
         if isinstance(other, State):
             return self.__cost < other.__cost
 
-    def __le__(self, other):
-        if isinstance(other, State):
-            return self.__cost <= other.__cost
-          # return comparison
-    def __eq__(self, other):
-        if isinstance(other, State):
-            return self.__cost == other.__cost
+    def move(self, coords):
+        if self.__maze[coords['Y']][coords['X']] in ('X', 'S', '.'):
+            print('here', coords, self.__maze[coords['Y']][coords['X']],'end')
+            raise ValueError
 
-    def __ne__(self, other):
-        if isinstance(other, State):
-            return self.__cost != other.__cost
+        self.__maze[coords['Y']][coords['X']] = '.'
+        self.__pos.update(coords)
+        self.__cost += 1
 
-    def __gt__(self, other):
-        if isinstance(other, State):
-            return self.__cost > other.__cost
+    def heuristic(self):
+        return ((self.__pos['X'] - self.__exit['X']) ** 2 +
+                (self.__pos['Y'] - self.__exit['Y']) ** 2) ** 0.5
 
-    def __ge__(self, other):
-        if isinstance(other, State):
-            return self.__cost >= other.__cost
+    def expand(self):
 
-    def get(self):
-        return self.__state
+        steps = []
+
+        for _x in [-1, 1]:
+            if 0 <= self.__pos['X'] + _x < len(self.__maze[self.__pos['Y']]):
+                steps.append({'X': self.__pos['X'] + _x, 'Y': self.__pos['Y']})
+
+        for _y in [-1, 1]:
+            if 0 <= self.__pos['Y'] + _y < len(self.__maze):
+                steps.append({'X': self.__pos['X'], 'Y': self.__pos['Y'] + _y})
+
+        for entry in steps:
+            if self.__maze[entry['Y']][entry['X']] in ('X', 'S', '.'):
+                steps.remove(entry)
+
+        for index, entry in enumerate(steps):
+            coord = entry
+            steps[index] = State(state=self)
+            steps[index].move(coord)
+
+        return steps
 
     @property
     def cost(self):
         return self.__cost
-
-    @property
-    def state(self):
-        return self.__state
-
-    @state.setter
-    def state(self, state):
-        self.__state = state

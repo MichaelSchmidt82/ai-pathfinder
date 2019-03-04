@@ -51,21 +51,30 @@ class Stack:
         POP and then PUSH the stack
         """
         if not self.__stack:
-            raise ValueError("Ca'nt assign to an emtpy stack")
+            raise ValueError("Can't assign to an emtpy stack")
 
         self.__stack[-1] = top
 
-    def pop(self, n=1):
+    def pop(self):
         """
         POP operation
         """
-        if n < len(self.__stack):
-            for _ in range(n):
-                self.__stack = self.__stack[:-1]
-        elif n == len(self.__stack):
-            self.__stack = []
-        else:
-            raise ValueError('n > stack.size')
+
+        if self.__stack:
+            top = self.__stack[-1]
+            self.__stack = self.__stack[:-1]
+            return top
+
+        return None
+
+    def items(self):
+        """
+        Generator POP
+        """
+        for _ in self.__stack:
+            top = self.__stack[-1]
+            self.__stack = self.__stack[:-1]
+            yield top
 
     def push(self, value=None):
         """
