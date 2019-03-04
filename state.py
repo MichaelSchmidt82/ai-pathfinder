@@ -85,29 +85,23 @@ class State:
 
     def expand(self):
 
-        steps = []
+        frontier = []
         for _x in [-1, 1]:
             if 0 <= self.__pos['X'] + _x < len(self.__maze[self.__pos['Y']]):
                 if self.__maze[self.__pos['Y']][self.__pos['X'] + _x] == ' ':
-                    steps.append({'X': self.__pos['X'] + _x, 'Y': self.__pos['Y']})
+                    frontier.append({'X': self.__pos['X'] + _x, 'Y': self.__pos['Y']})
 
         for _y in [-1, 1]:
             if 0 <= self.__pos['Y'] + _y < len(self.__maze):
                 if self.__maze[self.__pos['Y'] + _y][self.__pos['X']] == ' ':
-                    steps.append({'X': self.__pos['X'], 'Y': self.__pos['Y'] + _y})
+                    frontier.append({'X': self.__pos['X'], 'Y': self.__pos['Y'] + _y})
 
-        for entry in steps:
-            print('entry:', entry)
-
-        for index, entry in enumerate(steps):
+        for index, entry in enumerate(frontier):
             coord = entry
-            steps[index] = State(state=self)
-            try:
-                steps[index].move(coord)
-            except ValueError:
-                print('failure', coord)
+            frontier[index] = State(state=self)
+            frontier[index].move(coord)
 
-        return steps
+        return frontier
 
     def solved(self):
         return self.__pos['X'] == self.__exit['X'] and self.__pos['Y'] == self.__exit['Y']
