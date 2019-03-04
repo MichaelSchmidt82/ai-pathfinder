@@ -22,8 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import copy
-
 class State:
 
     def __init__(self, maze=None, state=None):
@@ -38,10 +36,12 @@ class State:
         if isinstance(state, State):
             self.__cost = state.__cost
             self.__parent = state
-            self.__maze = copy.copy(state.__maze)
+            self.__maze = [[value for value in row] for row in state.__maze]
 
             self.__enterance = state.__enterance
             self.__exit = state.__exit
+
+            self.__pos['X'], self.__pos['Y'] = state.__pos['X'], state.__pos['Y']
         elif maze:
             for _r, row in enumerate(maze):
                 for _c, value in enumerate(row):
@@ -50,18 +50,22 @@ class State:
                     elif value == 'E':
                         self.__exit['X'], self.__exit['Y'] = _c, _r
 
-        self.__pos['X'], self.__pos['Y'] = self.__enterance['X'], self.__enterance['Y']
+            self.__pos['X'], self.__pos['Y'] = self.__enterance['X'], self.__enterance['Y']
 
     def __str__(self):
         res = ''
         for _r, row in enumerate(self.__maze):
             for _c, value in enumerate(row):
-                res = '{} {}'.format(res, value)
+                if _r == self.__pos['Y'] and _c == self.__pos['X']:
+                    res = '{} o'.format(res)
+                else:
+                    res = '{} {}'.format(res, value)
             res = '{} {}'.format(res, '\n')
+        return '{} {}'.format(res, '\n')
 
-        res = '{} {}'.format(res, '\n')
-        return res
-
+    def __repr__(self):
+        res = str(self)
+        return '{} {} {}'.format(res, self.__cost, self.__pos)
 
     def __lt__(self, other):
         if isinstance(other, State):
@@ -69,8 +73,7 @@ class State:
 
     def move(self, coords):
         if self.__maze[coords['Y']][coords['X']] in ('X', 'S', '.'):
-            print('here', coords, self.__maze[coords['Y']][coords['X']],'end')
-            raise ValueError
+            raise ValueError('Move not available')
 
         self.__maze[coords['Y']][coords['X']] = '.'
         self.__pos.update(coords)
