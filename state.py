@@ -65,7 +65,7 @@ class State:
 
     def __repr__(self):
         res = str(self)
-        return '{} {} {}'.format(res, self.__cost, self.__pos)
+        return '{} {} {}\n'.format(res, self.__cost, self.__pos)
 
     def __lt__(self, other):
         if isinstance(other, State):
@@ -86,25 +86,31 @@ class State:
     def expand(self):
 
         steps = []
-
         for _x in [-1, 1]:
             if 0 <= self.__pos['X'] + _x < len(self.__maze[self.__pos['Y']]):
-                steps.append({'X': self.__pos['X'] + _x, 'Y': self.__pos['Y']})
+                if self.__maze[self.__pos['Y']][self.__pos['X'] + _x] == ' ':
+                    steps.append({'X': self.__pos['X'] + _x, 'Y': self.__pos['Y']})
 
         for _y in [-1, 1]:
             if 0 <= self.__pos['Y'] + _y < len(self.__maze):
-                steps.append({'X': self.__pos['X'], 'Y': self.__pos['Y'] + _y})
+                if self.__maze[self.__pos['Y'] + _y][self.__pos['X']] == ' ':
+                    steps.append({'X': self.__pos['X'], 'Y': self.__pos['Y'] + _y})
 
         for entry in steps:
-            if self.__maze[entry['Y']][entry['X']] in ('X', 'S', '.'):
-                steps.remove(entry)
+            print('entry:', entry)
 
         for index, entry in enumerate(steps):
             coord = entry
             steps[index] = State(state=self)
-            steps[index].move(coord)
+            try:
+                steps[index].move(coord)
+            except ValueError:
+                print('failure', coord)
 
         return steps
+
+    def solved(self):
+        return self.__pos['X'] == self.__exit['X'] and self.__pos['Y'] == self.__exit['Y']
 
     @property
     def cost(self):
